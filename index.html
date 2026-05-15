@@ -179,7 +179,7 @@ async function checkServer() {
 function setStatus(s){
   online = s==="online";
   dotEl.className="status-dot "+s;
-  txtEl.textContent = s==="online"?"Model online":s==="offline"?"Server offline":"Connecting…";
+  txtEl.textContent = s==="online"?"Model online":s==="offline"?"Server offline":"Connecting...";
   txtEl.style.color  = s==="online"?"var(--accent)":s==="offline"?"#ff4466":"var(--muted)";
 }
 
@@ -228,12 +228,35 @@ function addMsg(role,content,typing=false){
   av.textContent=role==="user"?"YOU":"L1";
   const bub=document.createElement("div");
   bub.className="bubble";
-  bub.innerHTML=typing?`<div class="typing-dots"><span></span><span></span><span></span></div>`:""
+  bub.innerHTML=typing?`<div class="typing-dots"><span></span><span></span><span></span></div>`:"";
   if(!typing)bub.textContent=content;
   msg.appendChild(av);msg.appendChild(bub);
   chatWin.appendChild(msg);
   chatWin.scrollTop=chatWin.scrollHeight;
   return bub;
+}
+
+function stripThinking(text){
+  // Remove <think>...</think> blocks Qwen adds
+  return text.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+}
+
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+async function typeWriter(el, text){
+  el.textContent="";
+  for(let i=0;i<text.length;i++){
+    el.textContent+=text[i];
+    chatWin.scrollTop=chatWin.scrollHeight;
+    const ch=text[i];
+    const delay = (ch==="."||ch==="!"||ch==="?") ? 40
+                : ch==="
+" ? 30
+                : (ch===","||ch===";"||ch===":") ? 22
+                : ch===" " ? 10
+                : 16;
+    await sleep(delay);
+  }
 }
 
 async function sendMessage(){
@@ -242,7 +265,7 @@ async function sendMessage(){
 
   if(!online){
     const ok=await checkServer();
-    if(!ok){addMsg("ai","⚠ Server offline. Run: python run_server.py — then try again.");return;}
+    if(!ok){addMsg("ai","Server offline. Run: python run_server.py then try again.");return;}
   }
 
   busy=true;sendBtn.disabled=true;
@@ -253,7 +276,7 @@ async function sendMessage(){
 
   const active=histList.querySelector(".history-item.active");
   if(active&&active.textContent==="New conversation"){
-    const label=text.slice(0,30)+(text.length>30?"…":"");
+    const label=text.slice(0,30)+(text.length>30?"...":"");
     active.textContent=label;
     document.getElementById("header-title").textContent=label;
   }
@@ -268,40 +291,18 @@ async function sendMessage(){
     });
     const data=await res.json();
     bub.innerHTML="";
-    const raw=data.error?"⚠ "+data.error:stripThinking(data.reply);
+    const raw=data.error ? "Error: "+data.error : stripThinking(data.reply);
     if(!data.error)history.push({role:"assistant",content:raw});
     await typeWriter(bub, raw);
   } catch(e){
     bub.innerHTML="";
-    bub.textContent="⚠ Could not reach server. Is run_server.py running?";
+    bub.textContent="Could not reach server. Is run_server.py running?";
     setStatus("offline");
   }
 
   chatWin.scrollTop=chatWin.scrollHeight;
   busy=false;sendBtn.disabled=false;
 }
-
-function stripThinking(text){
-  return text.replace(/<think>[\s\S]*?<\/think>/gi,"").trim();
-}
-
-async function typeWriter(el, text){
-  el.textContent="";
-  for(let i=0;i<text.length;i++){
-    el.textContent+=text[i];
-    chatWin.scrollTop=chatWin.scrollHeight;
-    const ch=text[i];
-    const delay = ch==="."||ch==="!"||ch==="?" ? 40
-                : ch==="
-" ? 30
-                : ch===","||ch===";"||ch===":" ? 22
-                : ch===" " ? 10
-                : 16;
-    await sleep(delay);
-  }
-}
-
-function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 </script>
 </body>
 </html>
