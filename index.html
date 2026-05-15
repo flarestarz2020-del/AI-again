@@ -269,8 +269,8 @@ async function sendMessage(){
     const data=await res.json();
     bub.innerHTML="";
     const reply=data.error?"⚠ "+data.error:data.reply;
-    bub.textContent=reply;
     if(!data.error)history.push({role:"assistant",content:reply});
+    await typeWriter(bub, reply);
   } catch(e){
     bub.innerHTML="";
     bub.textContent="⚠ Could not reach server. Is run_server.py running?";
@@ -280,6 +280,23 @@ async function sendMessage(){
   chatWin.scrollTop=chatWin.scrollHeight;
   busy=false;sendBtn.disabled=false;
 }
+
+async function typeWriter(el, text){
+  el.textContent="";
+  for(let i=0;i<text.length;i++){
+    el.textContent+=text[i];
+    chatWin.scrollTop=chatWin.scrollHeight;
+    const ch=text[i];
+    const delay = ch==="."||ch==="!"||ch==="?"||ch==="
+" ? 40
+                : ch===","||ch===";"||ch===":" ? 25
+                : ch===" " ? 12
+                : 18;
+    await sleep(delay);
+  }
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 </script>
 </body>
 </html>
