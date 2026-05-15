@@ -268,9 +268,9 @@ async function sendMessage(){
     });
     const data=await res.json();
     bub.innerHTML="";
-    const reply=data.error?"⚠ "+data.error:data.reply;
-    if(!data.error)history.push({role:"assistant",content:reply});
-    await typeWriter(bub, reply);
+    const raw=data.error?"⚠ "+data.error:stripThinking(data.reply);
+    if(!data.error)history.push({role:"assistant",content:raw});
+    await typeWriter(bub, raw);
   } catch(e){
     bub.innerHTML="";
     bub.textContent="⚠ Could not reach server. Is run_server.py running?";
@@ -281,17 +281,22 @@ async function sendMessage(){
   busy=false;sendBtn.disabled=false;
 }
 
+function stripThinking(text){
+  return text.replace(/<think>[\s\S]*?<\/think>/gi,"").trim();
+}
+
 async function typeWriter(el, text){
   el.textContent="";
   for(let i=0;i<text.length;i++){
     el.textContent+=text[i];
     chatWin.scrollTop=chatWin.scrollHeight;
     const ch=text[i];
-    const delay = ch==="."||ch==="!"||ch==="?"||ch==="
-" ? 40
-                : ch===","||ch===";"||ch===":" ? 25
-                : ch===" " ? 12
-                : 18;
+    const delay = ch==="."||ch==="!"||ch==="?" ? 40
+                : ch==="
+" ? 30
+                : ch===","||ch===";"||ch===":" ? 22
+                : ch===" " ? 10
+                : 16;
     await sleep(delay);
   }
 }
