@@ -249,12 +249,7 @@ async function typeWriter(el, text){
     el.textContent+=text[i];
     chatWin.scrollTop=chatWin.scrollHeight;
     const ch=text[i];
-    const delay = (ch==="."||ch==="!"||ch==="?") ? 40
-                : ch==="
-" ? 30
-                : (ch===","||ch===";"||ch===":") ? 22
-                : ch===" " ? 10
-                : 16;
+    const delay = (ch==="."||ch==="!"||ch==="?") ? 40 : ch==="\n" ? 30 : (ch===","||ch===";"||ch===":") ? 22 : ch===" " ? 10 : 16;
     await sleep(delay);
   }
 }
