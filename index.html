@@ -241,8 +241,8 @@
     }
     aside.open{display:flex;transform:translateX(0)}
 
-    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99}
-    .sidebar-overlay.open{display:block}
+  .sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99;display:none;pointer-events:none;}
+  .sidebar-overlay.open{display:block;pointer-events:auto;}
 
     main{grid-column:1;grid-row:1/3;min-height:0;}
 
@@ -276,7 +276,6 @@
 </head>
 <body>
 
-<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 <aside id="sidebar">
   <div class="logo-block">
     <div class="logo-icon"></div>
@@ -306,6 +305,8 @@
     </div>
   </div>
 </aside>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
 <main>
   <header>
